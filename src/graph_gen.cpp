@@ -8,15 +8,23 @@ std::size_t get_idx(std::size_t i, std::size_t j, std::size_t k, std::size_t n) 
 
 int main(int argc, char **argv) {
   // Check number of parameters and read dimension.
-  if (argc != 2) {
+  if (argc != 3) {
     fprintf(stderr, "Wrong number of arguments.\n");
-    fprintf(stderr, "Expecting the dimension n of the nxn-matrix.\n");
+    fprintf(stderr, "Expecting the dimension n of the nxn-matrix and the name "
+        "output file.\n");
     return 0;
   }
   std::size_t n = atoi(argv[1]);
   if (n < 1) {
     fprintf(stderr, "Invalid dimension: %ld\n", n);
     fprintf(stderr, "Matrix must be at least 1x1.\n");
+    return 0;
+  }
+
+  // Open output file.
+  FILE *fout = fopen(argv[2], "w");
+  if (fout == NULL) {
+    fprintf(stderr, "Could not open file: %s\n", argv[2]);
     return 0;
   }
 
@@ -73,10 +81,12 @@ int main(int argc, char **argv) {
     v.erase(last, v.end());
     m += v.size();
   }
-  printf("%ld %ld\n", n * n * n, m / 2);
+  fprintf(fout, "%ld %ld\n", n * n * n, m / 2);
   for (auto &v : adjlist) {
-    for (std::size_t w : v) printf("%ld ", w + 1);
-    printf("\n");
+    for (std::size_t w : v) fprintf(fout, "%ld ", w + 1);
+    fprintf(fout, "\n");
   }
+  fclose(fout);
+  
   return 0;
 }

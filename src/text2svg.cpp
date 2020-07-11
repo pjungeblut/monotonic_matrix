@@ -23,22 +23,48 @@ const std::string COLORS[] = {
 };
 const std::size_t NUM_COLORS = sizeof(COLORS) / sizeof(std::string) - 1;
 
-int main() {
+int main(int argc, char **argv) {
+  // Check number of parameters.
+  if (argc != 4) {
+    fprintf(stderr, "Wrong number of parameters.\n");
+    fprintf(stderr, "Expecting the dimension of the matrix n, the name of the "
+        "input file containing the text representation and the name of the "
+        "output file containing the SVG image.\n");
+    return 0;
+  }
+
   // Read matrix dimension.
-  std::size_t n, s;
-  scanf("%ld %ld", &n, &s);
+  std::size_t n = atoi(argv[1]);
+
+  // Open input file.
+  FILE *fin = fopen(argv[2], "r");
+  if (fin == NULL) {
+    fprintf(stderr, "Error opening input file: %s\n", argv[2]);
+    return 0;
+  }
 
   // Read matrix.
   std::vector<std::vector<std::size_t>> mat(n, std::vector<std::size_t>(n));
   for (std::size_t i = 0; i < n; ++i) {
     for (std::size_t j = 0; j < n; ++j) {
-      scanf("%ld", &mat[i][j]);
+      if (!fscanf(fin, "%ld", &mat[i][j])) {
+        fprintf(stderr, "Not enough elements in the input file.\n");
+        return 0;
+      }
     }
+  }
+  fclose(fin);
+
+  // Open output file.
+  FILE *fout = fopen(argv[3], "w");
+  if (fout == NULL) {
+    fprintf(stderr, "Error opening output file: %s\n", argv[3]);
+    return 0;
   }
 
   // Build SVG.
   std::size_t dim = BLOCK_SIZE * n;
-  printf("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%ld\" "
+  fprintf(fout, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%ld\" "
       "height=\"%ld\" version=\"1.0\">\n", dim, dim);
   for (std::size_t i = 0; i < n; ++i) {
     for (std::size_t j = 0; j < n; ++j) {
@@ -47,16 +73,16 @@ int main() {
       std::string color = mat[i][j] <= NUM_COLORS
           ? COLORS[mat[i][j]]
           : COLORS[(mat[i][j] - 1) % NUM_COLORS + 1];
-      printf("<rect x=\"%ld\" y=\"%ld\" width=\"%ld\" height=\"%ld\" "
+      fprintf(fout, "<rect x=\"%ld\" y=\"%ld\" width=\"%ld\" height=\"%ld\" "
           "fill=\"#%s\" stroke=\"black\"/>\n",
           x, y, BLOCK_SIZE, BLOCK_SIZE, color.c_str());
       if (mat[i][j]) {
-        printf("<text x=\"%lf\" y=\"%lf\" dominant-baseline=\"central\" "
+        fprintf(fout, "<text x=\"%lf\" y=\"%lf\" dominant-baseline=\"central\" "
             "text-anchor=\"middle\">%ld</text>\n",
             x + BLOCK_SIZE / 2.0, y + BLOCK_SIZE / 2.0, mat[i][j]);
       }
     }
   }
-  printf("</svg>\n");
+  fprintf(fout, "</svg>\n");
   return 0;
 }
