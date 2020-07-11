@@ -29,7 +29,28 @@ To remove all built files execute:
 ```
 
 ## Usage
-TODO
+To generate the `11x11`-matrix shown above we first need to create the graph:
+```
+./graph_gen 11 11.graph
+```
+Then we need to find an independent set by using KaMIS.
+For a detailed description of the user interfaces, see its documentation.
+We can call two different programs (in `external/KaMIS-2.0`):
+```
+./redumis 11.graph --time_limit=60 --output=11.is
+```
+or
+```
+./online_mis 11.graph --time_limit=60 --output=11.is
+```
+To obtain a text-representation of the monotonic matrix call:
+```
+./is2text 11 11.is 11.txt
+```
+And finally we can get an SVG image with:
+```
+./text2svg 11 11.txt 11.svg
+```
 
 ## License
 All tools here are published under MIT license. However, please also see the license of [KaMIS](https://github.com/KarlsruheMIS/KaMIS#License)!
